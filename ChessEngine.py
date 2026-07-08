@@ -18,11 +18,20 @@ class GameState():
         self.whiteToMove = True
         self.moveLog = []
 
+    #  Doesn't work with en passant, castling, & pawn promotion.
     def makeMove(self, move):
-            self.board[move.startRow][move.startCol] = "--"
-            self.board[move.endRow][move.endCol] = move.pieceMoved
-            self.moveLog.append(move)
+        self.board[move.startRow][move.startCol] = "--"
+        self.board[move.endRow][move.endCol] = move.pieceMoved
+        self.moveLog.append(move)
+        self.whiteToMove = not self.whiteToMove
+
+    def undoMove(self):
+         if len(self.moveLog) != 0:
+            move = self.moveLog.pop()
+            self.board[move.endRow][move.endCol] = move.pieceCaptured
+            self.board[move.startRow][move.startCol] = move.pieceMoved
             self.whiteToMove = not self.whiteToMove
+
 
 class Move():
     ranksToRows = {"1": 7, "2": 6, "3": 5, "4": 4,
@@ -45,4 +54,4 @@ class Move():
         return self.getFileRank(self.startRow, self.startCol) + self.getFileRank(self.endRow, self.endCol)
 
     def getFileRank(self, r, c):
-        return self.colsToFiles[c] + self.rowsToRanks[r]
+        return self.colsToFiles[c] + self.rowsToRanks[r] 

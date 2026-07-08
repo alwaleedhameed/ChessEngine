@@ -3,12 +3,6 @@
 import pygame as pg
 import ChessEngine 
 
-WIDTH = HEIGHT = 512
-DIMENSION = 8
-SQ_SIZE = HEIGHT // DIMENSION
-MAX_FPS = 15 # For animations later on
-IMAGES = {}
-
 ##################################################################################
 # Initialize a global dictionary of images to be called once in main.
 
@@ -41,6 +35,12 @@ def drawPieces(screen, board):
 
 ##################################################################################
 # Main code driver; responsible for handling user input and updating graphics
+WIDTH = HEIGHT = 512
+DIMENSION = 8
+SQ_SIZE = HEIGHT // DIMENSION
+MAX_FPS = 15 # For animations later on
+IMAGES = {}
+
 def main():
     pg.init()
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -56,6 +56,7 @@ def main():
         for e in pg.event.get():
             if e.type == pg.QUIT:
                 running = False
+            # Mouse handlers
             elif e.type == pg.MOUSEBUTTONDOWN:
                 location = pg.mouse.get_pos() 
                 col = location[0] // SQ_SIZE
@@ -72,6 +73,10 @@ def main():
                     gs.makeMove(move)
                     sqSelected = ()
                     playerClicks = []
+            #  key handlers
+            elif e.type == pg.KEYDOWN: 
+                if e.key == pg.K_z:
+                    gs.undoMove()
                     
 
         drawGameState(screen, gs.board)
@@ -80,4 +85,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main() 
