@@ -32,6 +32,32 @@ class GameState():
             self.board[move.startRow][move.startCol] = move.pieceMoved
             self.whiteToMove = not self.whiteToMove
 
+    def allValidMoves(self):
+        pass
+
+    def allPossibleMoves(self):
+        for r in range(len(self.board)):
+            for c in range(len(self.board[r])):
+                turn = self.board[r][c][0]
+                if (turn == 'w' and self.whiteToMove) or (turn == 'b' and not self.whiteToMove):
+                    piece = self.board[r][c][1]
+                    if piece == 'P':
+                        pass
+                    elif piece == 'R':
+                        pass
+                    elif piece == 'N':
+                        pass
+                    elif piece == 'Q':
+                        pass
+                    elif piece == 'K':
+                        pass
+        pass
+
+    def getPawnMoves(self, r, c, moves):
+        pass
+
+    def getRookMoves(self, r, c, moves):
+        pass
 
 class Move():
     ranksToRows = {"1": 7, "2": 6, "3": 5, "4": 4,
@@ -49,6 +75,14 @@ class Move():
         self.endCol = endSq[1]
         self.pieceMoved = board[self.startRow][self.startCol]
         self.pieceCaptured = board[self.endRow][self.endCol]
+        self.moveID = self.startRow * 1000 + self.startCol * 100 + self.endRow * 10 + self.endCol # "hash function"
+        print(self.moveID)
+    
+    def __eq__(self, other)
+        if isinstance(other, Move):
+            return self.moveID == other.moveID
+        return False
+
 
     def getChessNotation(self):
         return self.getFileRank(self.startRow, self.startCol) + self.getFileRank(self.endRow, self.endCol)
