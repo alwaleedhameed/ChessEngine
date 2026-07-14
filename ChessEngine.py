@@ -16,6 +16,7 @@ class GameState():
             ["wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"],
             ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]]
         self.whiteToMove = True
+        self.moveFunctions = {'P': self.getPawnMoves, 'R' : self.getRookMoves, 'N': self.getKnightMoves, 'B': self.getBishopMoves, 'Q': self.getQueenMoves, 'K': self.getKingMoves}
         self.moveLog = []
 
     #  Doesn't work with en passant, castling, & pawn promotion.
@@ -32,31 +33,55 @@ class GameState():
             self.board[move.startRow][move.startCol] = move.pieceMoved
             self.whiteToMove = not self.whiteToMove
 
-    def allValidMoves(self):
-        pass
+    def getValidMoves(self):
+        return self.getPossibleMoves()
 
-    def allPossibleMoves(self):
+    def getPossibleMoves(self):
+        moves = []
         for r in range(len(self.board)):
             for c in range(len(self.board[r])):
                 turn = self.board[r][c][0]
                 if (turn == 'w' and self.whiteToMove) or (turn == 'b' and not self.whiteToMove):
                     piece = self.board[r][c][1]
-                    if piece == 'P':
-                        pass
-                    elif piece == 'R':
-                        pass
-                    elif piece == 'N':
-                        pass
-                    elif piece == 'Q':
-                        pass
-                    elif piece == 'K':
-                        pass
-        pass
+                    self.moveFunctions[piece](r, c, moves) # Gets moves per piece 
+        return moves
 
     def getPawnMoves(self, r, c, moves):
-        pass
+        if self.whiteToMove:
+            if self.board[r-1][c] == '--': # Regular step forward
+                if r == 6 and self.board[r-2][c] == '--': # Initial two step
+                    moves.append(Move((r, c), (r-2, c), self.board))
+                moves.append(Move((r, c), (r-1, c), self.board))
+            if c != 7 and self.board[r-1][c+1][0] == 'b': # Capturing up right
+                moves.append(Move((r, c), (r-1, c+1), self.board))
+            if c != 0 and self.board[r-1][c-1][0] == 'b': # Capturing up left
+                moves.append(Move((r, c), (r-1, c-1), self.board))
+            
+        else:
+            if self.board[r+1][c] == '--':
+                if r == 1 and self.board[r+2][c] == '--':  # Initial two step
+                    moves.append(Move((r, c), (r+2, c), self.board))
+                moves.append(Move((r, c), (r+1, c,), self.board))
+            if c != 7 and self.board[r+1][c+1][0] == 'w': # Capturing down right
+                moves.append(Move((r, c), (r+1, c+1), self.board))
+            if c != 0 and self.board[r+1][c-1][0] == 'w': # Capturing down left
+                moves.append(Move((r, c), (r+1, c-1), self.board))
+
+        return moves
 
     def getRookMoves(self, r, c, moves):
+        pass
+
+    def getKnightMoves(self, r, c, moves):
+        pass
+
+    def getBishopMoves(self, r, c, moves):
+        pass
+
+    def getQueenMoves(self, r, c, moves):
+        pass
+
+    def getKingMoves(self, r, c, moves):
         pass
 
 class Move():
@@ -76,9 +101,8 @@ class Move():
         self.pieceMoved = board[self.startRow][self.startCol]
         self.pieceCaptured = board[self.endRow][self.endCol]
         self.moveID = self.startRow * 1000 + self.startCol * 100 + self.endRow * 10 + self.endCol # "hash function"
-        print(self.moveID)
     
-    def __eq__(self, other)
+    def __eq__(self, other):
         if isinstance(other, Move):
             return self.moveID == other.moveID
         return False
