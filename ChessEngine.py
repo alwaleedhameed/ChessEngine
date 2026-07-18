@@ -67,19 +67,135 @@ class GameState():
             if c != 0 and self.board[r+1][c-1][0] == 'w': # Capturing down left
                 moves.append(Move((r, c), (r+1, c-1), self.board))
 
-        return moves
 
     def getRookMoves(self, r, c, moves):
-        pass
+        if self.whiteToMove:
+            rTry = 1 # Finding valid non-white piece spaces up
+            moveToSave = None
+            while r - rTry >= 0 and self.board[r - rTry][c][0] == '-':
+                moves.append(Move((r, c),(r - rTry, c), self.board))
+                rTry += 1
+            if r - rTry >= 0 and self.board[r - rTry][c][0] == 'b':
+                moves.append(Move((r, c),(r - rTry, c), self.board))
+
+            rTry = 1 # Finding valid non-white piece spaces down
+            moveToSave = None
+            while r + rTry <= 7 and self.board[r + rTry][c][0] == '-':
+                moves.append(Move((r, c),(r + rTry, c), self.board))
+                rTry += 1
+            if r + rTry <= 7 and self.board[r + rTry][c][0] == 'b':
+                moves.append(Move((r, c),(r + rTry, c), self.board))
+
+            cTry = 1 # Finding valid non-white piece spaces left
+            moveToSave = None
+            while c - cTry >= 0 and self.board[r][c - cTry][0] == '-':
+                moves.append(Move((r, c),(r, c - cTry), self.board))
+                cTry += 1
+            if c - cTry >= 0 and self.board[r][c - cTry][0] == 'b':
+                moves.append(Move((r, c),(r, c - cTry), self.board))
+
+            cTry = 1 # Finding valid non-white piece spaces right
+            moveToSave = None
+            while c + cTry <= 7 and self.board[r][c + cTry][0] == '-':
+                moves.append(Move((r, c),(r, c + cTry), self.board))
+                cTry += 1   
+            if  c + cTry <= 7 and self.board[r][c + cTry][0] == 'b':
+                moves.append(Move((r, c),(r, c + cTry), self.board))
+
+
+        else:
+            rTry = 1 # Finding valid non-white piece spaces up
+            moveToSave = None
+            while r - rTry >= 0 and self.board[r - rTry][c][0] == '-':
+                moves.append(Move((r, c),(r - rTry, c), self.board))
+                rTry += 1
+            if r - rTry >= 0 and self.board[r - rTry][c][0] == 'w':
+                moves.append(Move((r, c),(r - rTry, c), self.board))
+
+            rTry = 1 # Finding valid non-white piece spaces down
+            moveToSave = None
+            while r + rTry <= 7 and self.board[r + rTry][c][0] == '-':
+                moves.append(Move((r, c),(r + rTry, c), self.board))
+                rTry += 1
+            if r + rTry <= 7 and self.board[r + rTry][c][0] == 'w':
+                moves.append(Move((r, c),(r + rTry, c), self.board))
+
+            cTry = 1 # Finding valid non-white piece spaces left
+            moveToSave = None
+            while c - cTry >= 0 and self.board[r][c - cTry][0] == '-':
+                moves.append(Move((r, c),(r, c - cTry), self.board))
+                cTry += 1
+            if c - cTry >= 0 and self.board[r][c - cTry][0] == 'w':
+                moves.append(Move((r, c),(r, c - cTry), self.board))
+
+            cTry = 1 # Finding valid non-white piece spaces right
+            moveToSave = None
+            while c + cTry <= 7 and self.board[r][c + cTry][0] == '-':
+                moves.append(Move((r, c),(r, c + cTry), self.board))
+                cTry += 1   
+            if c + cTry <= 7 and self.board[r][c + cTry][0] == 'w':
+                moves.append(Move((r, c),(r, c + cTry), self.board))
+
+        # alternate codeblock:
+        '''
+        directions = ((-1,0), (0,-1), (1,0), (0,1))
+        enemyColor = 'b' if self.whiteToMove else 'w'
+        for d in directions:
+            for i in range (1,8):
+                endRow = r + d[0] * i
+                endCol = c + d[1] * i 
+                if 0 <= endRow <= 7 and 0 <= endCol <= 7:
+                    endPiece = self.board[endRow][endCol]
+                    if endPiece == "--":
+                        moves.append(Move(r, c), (endRow, endCol), self.board)
+                    elif endPiece[0] == enemyColor:
+                        moves.append(Move(r, c), (endRow, endCol), self.board)
+                        break
+                    else:
+                        break
+                else:
+                    break   
+
+        return moves
+        '''
+
 
     def getKnightMoves(self, r, c, moves):
-        pass
+        spots = ((-2, 1), (-1, 2), (1, 2), (2, 1), (2, -1), (-1, -2), (1, -2), (-2, -1))
+        enemyColor = 'b' if self.whiteToMove else 'w'
+        for spot in spots: 
+            endRow = r + spot[0]
+            endCol = c + spot[1]
+            if 0 <= endRow <= 7 and 0 <= endCol <= 7:
+                endPiece = self.board[endRow][endCol]
+                if endPiece == '--' or endPiece[0] == enemyColor:
+                    moves.append(Move((r, c), (endRow, endCol), self.board))
+
 
     def getBishopMoves(self, r, c, moves):
-        pass
+        directions = ((-1,1), (1,1), (1,-1), (-1,-1))
+        enemyColor = 'b' if self.whiteToMove else 'w'
+        for d in directions:
+            for i in range (1,8):
+                endRow = r + d[0] * i
+                endCol = c + d[1] * i 
+                if 0 <= endRow <= 7 and 0 <= endCol <= 7:
+                    endPiece = self.board[endRow][endCol]
+                    if endPiece == "--":
+                        moves.append(Move((r, c), (endRow, endCol), self.board))
+                    elif endPiece[0] == enemyColor:
+                        moves.append(Move((r, c), (endRow, endCol), self.board))
+                        break
+                    else:
+                        break
+                else:
+                    break   
+
 
     def getQueenMoves(self, r, c, moves):
-        pass
+        self.getRookMoves(r, c, moves)
+        self.getBishopMoves(r, c, moves)
+        
 
     def getKingMoves(self, r, c, moves):
         pass
