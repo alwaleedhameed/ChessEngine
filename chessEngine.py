@@ -18,6 +18,8 @@ class GameState():
         self.whiteToMove = True
         self.moveFunctions = {'P': self.getPawnMoves, 'R' : self.getRookMoves, 'N': self.getKnightMoves, 'B': self.getBishopMoves, 'Q': self.getQueenMoves, 'K': self.getKingMoves}
         self.moveLog = []
+        self.whiteKingLocation = (7, 4)
+        self.blackKingLocation = (7, 4)
 
     #  Doesn't work with en passant, castling, & pawn promotion.
     def makeMove(self, move):
@@ -25,13 +27,21 @@ class GameState():
         self.board[move.endRow][move.endCol] = move.pieceMoved
         self.moveLog.append(move)
         self.whiteToMove = not self.whiteToMove
+        if move.pieceMoved == "wK":
+            self.whiteKingLocation = self.board[move.endRow][move.endCol]
+        elif move.pieceMOved == "bK":
+            self.blackKingLocation = self.board[move.endRow]
 
     def undoMove(self):
-         if len(self.moveLog) != 0:
+        if len(self.moveLog) != 0:
             move = self.moveLog.pop()
             self.board[move.endRow][move.endCol] = move.pieceCaptured
             self.board[move.startRow][move.startCol] = move.pieceMoved
             self.whiteToMove = not self.whiteToMove
+        if move.pieceMoved == "wK":
+            self.whiteKingLocation = self.board[move.endRow][move.endCol]
+        elif move.pieceMoved == "bK":
+            self.blackKingLocation = self.board[move.endRow][move.endCol]
 
     def getValidMoves(self):
         return self.getPossibleMoves()
@@ -198,7 +208,15 @@ class GameState():
         
 
     def getKingMoves(self, r, c, moves):
-        pass
+        spots = ((-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1))
+        allyColor = 'w' if self.whiteToMove else 'b'
+        for spot in spots:
+            endRow = r + spot[0]
+            endCol = c + spot[1]
+            if 0 <= endRow <= 7 and 0 <= endCol <= 7:
+                endPiece = self.board[endRow][endCol]
+                if endPiece[0] != allyColor:
+                    moves.append(Move((r, c), (endRow, endCol), self.board))
 
 class Move():
     ranksToRows = {"1": 7, "2": 6, "3": 5, "4": 4,

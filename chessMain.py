@@ -76,8 +76,10 @@ def main():
                         print(move.getChessNotation())
                         gs.makeMove(move)
                         moveMade = True
-                    sqSelected = ()
-                    playerClicks = []
+                        sqSelected = ()
+                        playerClicks = []
+                    else: # For choosing another piece with one click rather than having to waste click
+                        playerClicks = [sqSelected]
             #  key handlers
             elif e.type == pg.KEYDOWN: 
                 if e.key == pg.K_z:
