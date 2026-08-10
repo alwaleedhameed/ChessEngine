@@ -1,7 +1,7 @@
 # Main File: Responsible for storing user input and representing game state.
 
 import pygame as pg
-import ChessEngine 
+import chessEnginePro
 
 ##################################################################################
 # Initialize a global dictionary of images to be called once in main.
@@ -46,7 +46,7 @@ def main():
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     clock = pg.time.Clock()
     screen.fill(pg.Color("white"))
-    gs = ChessEngine.GameState()
+    gs = chessEnginePro.GameState()
     validMoves = gs.getValidMoves()
     moveMade = False
 
@@ -71,7 +71,7 @@ def main():
                     sqSelected = (row, col)
                     playerClicks.append(sqSelected)
                 if len(playerClicks) == 2:
-                    move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
+                    move = chessEnginePro.Move(playerClicks[0], playerClicks[1], gs.board)
                     if move in validMoves:
                         print(move.getChessNotation())
                         gs.makeMove(move)
