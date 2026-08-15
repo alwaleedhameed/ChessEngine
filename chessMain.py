@@ -72,13 +72,16 @@ def main():
                     playerClicks.append(sqSelected)
                 if len(playerClicks) == 2:
                     move = chessEnginePro.Move(playerClicks[0], playerClicks[1], gs.board)
-                    if move in validMoves:
-                        print(move.getChessNotation())
-                        gs.makeMove(move)
-                        moveMade = True
-                        sqSelected = ()
-                        playerClicks = []
-                    else: # For choosing another piece with one click rather than having to waste click
+
+                    for i in range(len(validMoves)):
+                        if move == validMoves[i]:
+                            gs.makeMove(validMoves[i])
+                            print(move.getChessNotation())
+                            moveMade = True
+                            sqSelected = ()
+                            playerClicks = []
+                            break
+                    if not moveMade: # For choosing another piece with one click rather than having to waste click
                         playerClicks = [sqSelected]
             #  key handlers
             elif e.type == pg.KEYDOWN: 
