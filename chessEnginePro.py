@@ -23,8 +23,8 @@ class GameState():
         self.enPassantPossible = () # Square location that enables en passant
         self.currentCastlingRight = CastleRights(True, True, True, True)
         self.castleRightsLog = [CastleRights(self.currentCastlingRight.wqs, self.currentCastlingRight.wks, self.currentCastlingRight.bqs, self.currentCastlingRight.bks)]
-        self.checkMate = False
-        self.staleMate = False
+        self.checkmate = False
+        self.stalemate = False
 
 
     def makeMove(self, move):
@@ -158,6 +158,15 @@ class GameState():
                 self.getKingMoves(kingRow, kingCol, moves)
         else:
             moves = self.getPossibleMoves()
+
+        if len(moves) == 0:
+            if self.inCheck:
+                self.checkmate = True
+            else:
+                self.stalemate = True
+        else:
+            self.checkmate = False
+            self.stalemate = False
 
         return moves
 
@@ -343,7 +352,7 @@ class GameState():
             self.getQueenSide(r, c, moves, allyColor)
          
     def getKingSide(self, r, c, moves, allyColor):
-        if self.board[r][c+1] == '--' and self.board[r][c+2] == '--':
+        if self.board[r][c+1] == '--' and self.board[r][c+2] == '--' and self.board[r][c+3] == allyColor + 'R':
             if allyColor == 'w':
                 self.whiteKingLocation = (r, c+1)
                 inCheck, x, y = self.checkForPinsAndChecks()
@@ -364,7 +373,7 @@ class GameState():
                 self.blackKingLocation = (r, c)
 
     def getQueenSide(self, r, c, moves, allyColor):
-        if self.board[r][c-1] == '--' and self.board[r][c-2] == '--' and self.board[r][c-3] == '--':
+        if self.board[r][c-1] == '--' and self.board[r][c-2] == '--' and self.board[r][c-3] == '--' and self.board[r][c-4] == allyColor + 'R':
             if allyColor == 'w':
                 self.whiteKingLocation = (r, c-1)
                 inCheck, x, y = self.checkForPinsAndChecks()
@@ -419,7 +428,7 @@ class GameState():
                         type = endPiece[1]
                         if (0 <= j <= 3 and type == 'R') \
                         or (4 <= j <= 7 and type == 'B') \
-                        or (i == 1 and type == 'p' and ((enemyColor == 'w' and 6 <= j <= 7) or (enemyColor == 'b' and 4 <= j <= 5))) \
+                        or (i == 1 and type == 'P' and ((enemyColor == 'w' and 6 <= j <= 7) or (enemyColor == 'b' and 4 <= j <= 5))) \
                         or (type == 'Q') \
                         or (i == 1 and type == 'K'):
                             if possiblePin == ():
@@ -429,6 +438,8 @@ class GameState():
                             else:
                                 pins.append(possiblePin)
                                 break
+                        else:
+                            break
 
         knightSpots = ((-2, 1), (-1, 2), (1, 2), (2, 1), (2, -1), (-1, -2), (1, -2), (-2, -1))
         for spot in knightSpots:
