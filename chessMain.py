@@ -2,6 +2,7 @@
 
 import pygame as pg
 import chessEnginePro
+import chessMoveFinder
 
 ##################################################################################
 # Initialize a global dictionary of images to be called once in main.
@@ -96,6 +97,7 @@ def drawText(screen, text):
     textObject = font.render(text, 0, pg.Color("Black"))
     screen.blit(textObject, textLocation.move(2, 2))
 
+
 ##################################################################################
 # Main code driver; responsible for handling user input and updating graphics
 WIDTH = HEIGHT = 713
@@ -112,20 +114,23 @@ def main():
     gs = chessEnginePro.GameState()
     validMoves = gs.getValidMoves()
     loadImages()
-    moveMade = False
-    animate = False
-    gameOver = False
     running = True
     sqSelected = ()
     playerClicks =[]
+    moveMade = False
+    animate = False
+    gameOver = False
+    player1 = True # True if human, false if AI
+    player2 = True
 
     while running:
+        humanTurn = (gs.whiteToMove and player1) or (not gs.whiteToMove and player2)
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
             # Mouse handlers
             elif event.type == pg.MOUSEBUTTONDOWN:
-                if not gameOver:
+                if not gameOver and humanTurn:
                     location = pg.mouse.get_pos() 
                     col = location[0] // SQ_SIZE
                     row = location[1] // SQ_SIZE
@@ -164,6 +169,14 @@ def main():
                     moveMade = False
                     animate = False
 
+        # AI move finder logic
+        if not gameOver and not humanTurn:
+            # randAI = chessMoveFinder.getRandomMove(validMoves)
+            # greedyAI = chessMoveFinder.getGreedyMove(gs, validMoves)
+            minMaxAI = chessMoveFinder.getMinMaxMove(gs, validMoves)
+            gs.makeMove(minMaxAI)
+            moveMade = True
+            animate = True
 
         if moveMade:
             validMoves = gs.getValidMoves()
