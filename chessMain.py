@@ -120,7 +120,7 @@ def main():
     moveMade = False
     animate = False
     gameOver = False
-    player1 = True # True if human, false if AI
+    player1 = False # True if human, false if AI
     player2 = True
 
     while running:
@@ -173,12 +173,13 @@ def main():
         if not gameOver and not humanTurn:
             # randAI = chessMoveFinder.getRandomMove(validMoves)
             # greedyAI = chessMoveFinder.getGreedyMove(gs, validMoves)
-            minMaxAI = chessMoveFinder.getMinMaxMove(gs, validMoves)
-            gs.makeMove(minMaxAI)
+            # hardcodedMinMaxAI = chessMoveFinder.getManualMinMaxMove(gs, validMoves)
+            recMinMaxAI = chessMoveFinder.getNegaMaxMoveABPRUNING(gs, validMoves, 3)
+            gs.makeMove(recMinMaxAI)
             moveMade = True
             animate = True
 
-        if moveMade:
+        if moveMade: 
             validMoves = gs.getValidMoves()
             if animate:
                 animateMove(gs.moveLog[-1], screen, gs.board, clock)
