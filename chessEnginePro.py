@@ -39,15 +39,17 @@ class GameState():
 
         # Pawn promotion    
         if move.isPawnPromotion:
-            options = ['Q', 'R', 'B', 'N']
-            flag = True
-            while flag:
-                choice = input("What would you like to promote to? ")
-                if choice in options:
-                    self.board[move.endRow][move.endCol] = move.pieceMoved[0] + choice
-                    flag = False
-                else:
-                    print("Please enter one: \nQ:Queen\nR: Rook\nB: Bishop\nN: Knight\n")
+            self.board[move.endRow][move.endCol] = move.pieceMoved[0] + 'Q'
+
+            # options = ['Q', 'R', 'B', 'N']
+            # flag = True
+            # while flag:
+            #     choice = input("What would you like to promote to? ")
+            #     if choice in options:
+            #         self.board[move.endRow][move.endCol] = move.pieceMoved[0] + choice
+            #         flag = False
+            #     else:
+            #         print("Please enter one: \nQ:Queen\nR: Rook\nB: Bishop\nN: Knight\n")
 
         # En Passant
         move.enPassantPossibleBeforeMove = self.enPassantPossible
@@ -89,7 +91,7 @@ class GameState():
                 self.board[move.startRow][move.endCol] = move.pieceCaptured
             self.enPassantPossible = move.enPassantPossibleBeforeMove 
             self.castleRightsLog.pop()
-            self.currentCastlingRight = self.castleRightsLog[-1]
+            self.currentCastlingRight = CastleRights(self.castleRightsLog[-1].wqs, self.castleRightsLog[-1].wks, self.castleRightsLog[-1].bqs, self.castleRightsLog[-1].bks)
 
             if move.isCastle:
                 if move.endCol - move.startCol == 2:
@@ -109,16 +111,31 @@ class GameState():
             elif move.pieceMoved[0] == 'b':
                 self.currentCastlingRight.bks = False
                 self.currentCastlingRight.bqs = False
-        elif move.pieceMoved[1] == 'R':
+
+        # Rook Moved
+        if move.pieceMoved[1] == 'R':
             if move.pieceMoved[0] == 'w':
-                if (move.startRow, move.startCol) == (0,0):
+                if (move.startRow, move.startCol) == (7,0):
                     self.currentCastlingRight.wqs = False
-                elif (move.startRow, move.startCol) == (0,7):
+                elif (move.startRow, move.startCol) == (7,7):
                     self.currentCastlingRight.wks = False
             elif move.pieceMoved[0] == 'b':
-                if (move.startRow, move.startCol) == (7,0):
+                if (move.startRow, move.startCol) == (0,0):
                     self.currentCastlingRight.bqs = False
-                elif (move.startRow, move.startCol) == (7,7):
+                elif (move.startRow, move.startCol) == (0,7):
+                    self.currentCastlingRight.bks = False
+
+        # Rook Captured
+        if move.pieceCaptured[1] == 'R':
+            if move.pieceCaptured[0] == 'w':
+                if (move.endRow, move.endCol) == (7,0):
+                    self.currentCastlingRight.wqs = False
+                elif (move.endRow, move.endCol) == (7,7):
+                    self.currentCastlingRight.wks = False
+            elif move.pieceCaptured[0] == 'b':
+                if (move.endRow, move.endCol) == (0,0):
+                    self.currentCastlingRight.bqs = False
+                elif (move.endRow, move.endCol) == (0,7):
                     self.currentCastlingRight.bks = False
 
 
@@ -192,7 +209,30 @@ class GameState():
                 self.pins.remove(self.pins[i])
                 break
 
-        if self.whiteToMove:
+        
+        secondProtector = True
+        kingRow, kingCol = self.whiteKingLocation if self.whiteToMove else self.blackKingLocation
+        if kingRow == r: # Potential discovered checkmate from en passant
+            threats = ['bR', 'bQ', 'wR', 'wQ']
+            threatCol = -1
+            startRange, endRange, step = (kingCol - 1, -1, -1) if kingCol > c else (kingCol + 1, 8, 1)
+            for col in range(startRange, endRange, step):
+                if (self.whiteToMove and self.board[r][col] in threats[0:2]) or (not self.whiteToMove and self.board[r][col] in threats[2:]):
+                    threatCol = col
+                    secondProtector = False
+                    break
+
+            if threatCol != -1: # If threat found
+                enemyPawn = True
+                for spot in range(min(kingCol, threatCol) + 1, max(kingCol, threatCol)):
+                    if spot != c and self.board[r][spot] != '--':
+                        if enemyPawn:
+                            enemyPawn = False
+                        else:
+                            secondProtector = True
+                            break
+
+        if self.whiteToMove: # White
             if self.board[r-1][c] == '--': # Regular step forward
                 if not pinnedPiece or pinDirection == (-1, 0):
                     if r == 6 and self.board[r-2][c] == '--': # Initial two step
@@ -201,15 +241,15 @@ class GameState():
 
             if c != 7 and self.board[r-1][c+1][0] == 'b' and (not pinnedPiece or pinDirection == (-1, 1)): # Capturing up right
                 moves.append(Move((r, c), (r-1, c+1), self.board))
-            elif c != 7 and (r-1, c+1) == self.enPassantPossible and (not pinnedPiece or pinDirection == (-1, 1)): # Capturing up right
+            elif c != 7 and (r-1, c+1) == self.enPassantPossible and (not pinnedPiece or pinDirection == (-1, 1)) and secondProtector: # Capturing up right
                 moves.append(Move((r, c), (r-1, c+1), self.board, isEnPassant=True))
 
             if c != 0 and self.board[r-1][c-1][0] == 'b' and (not pinnedPiece or pinDirection == (-1, -1)): # Capturing up left
                 moves.append(Move((r, c), (r-1, c-1), self.board))
-            elif c != 0 and (r-1, c-1) == self.enPassantPossible and (not pinnedPiece or pinDirection == (-1, -1)): # Capturing up left
+            elif c != 0 and (r-1, c-1) == self.enPassantPossible and (not pinnedPiece or pinDirection == (-1, -1)) and secondProtector: # Capturing up left
                 moves.append(Move((r, c), (r-1, c-1), self.board, isEnPassant=True))
             
-        else:
+        else: # Black
             if self.board[r+1][c] == '--':
                 if not pinnedPiece or pinDirection == (1, 0):
                     if r == 1 and self.board[r+2][c] == '--':  # Initial two step
@@ -218,11 +258,11 @@ class GameState():
 
             if c != 7 and self.board[r+1][c+1][0] == 'w' and (not pinnedPiece or pinDirection == (1, 1)): # Capturing down right
                 moves.append(Move((r, c), (r+1, c+1), self.board))
-            elif c != 7 and (r+1, c+1) == self.enPassantPossible and (not pinnedPiece or pinDirection == (1, 1)): # Capturing down right
+            elif c != 7 and (r+1, c+1) == self.enPassantPossible and (not pinnedPiece or pinDirection == (1, 1)) and secondProtector: # Capturing down right
                 moves.append(Move((r, c), (r+1, c+1), self.board, isEnPassant=True))
             if c != 0 and self.board[r+1][c-1][0] == 'w' and (not pinnedPiece or pinDirection == (1, -1 )): # Capturing down left
                 moves.append(Move((r, c), (r+1, c-1), self.board))
-            elif c != 0 and (r+1, c-1) == self.enPassantPossible and (not pinnedPiece or pinDirection == (1, -1 )): # Capturing down left
+            elif c != 0 and (r+1, c-1) == self.enPassantPossible and (not pinnedPiece or pinDirection == (1, -1 )) and secondProtector: # Capturing down left
                 moves.append(Move((r, c), (r+1, c-1), self.board, isEnPassant=True))
 
 
@@ -502,3 +542,22 @@ class Move():
 
     def getFileRank(self, r, c):
         return self.colsToFiles[c] + self.rowsToRanks[r] 
+
+    def __str__(self):
+        if self.isCastle:
+            return "O-O" if self.endCol == 6 else "O-O-O"
+
+        endSquare = self.getFileRank(self.endRow, self.endCol)
+
+        # Pawn moves: 
+        if self.pieceMoved[1] == 'P':
+            if self.pieceCaptured != '--':
+                return self.colsToFiles[self.startCol] + 'x' + endSquare
+            else:
+                return endSquare
+
+        # Any other piece moves:
+        moveString = self.pieceMoved[1]
+        if self.pieceCaptured != '--':
+            moveString += 'x'
+        return moveString + endSquare
